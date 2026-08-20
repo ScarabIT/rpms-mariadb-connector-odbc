@@ -1,24 +1,19 @@
 # For deep debugging we need to build binaries with extra debug info
 %bcond_with     debug
 
-# Disable CMake in-source builds
-#   This is a fix for the https://fedoraproject.org/wiki/Changes/CMake_to_do_out-of-source_builds
-#   So the beaviour will be the same also in F31 nad F32
-%undefine __cmake_in_source_build
-
 
 
 Name:           mariadb-connector-odbc
-Version:        3.1.12
-Release:        3%{?with_debug:.debug}%{?dist}
+Version:        3.1.23
+Release:        1%{?with_debug:.debug}%{?dist}
 Summary:        The MariaDB Native Client library (ODBC driver)
-License:        LGPLv2+
-Source:         https://downloads.mariadb.org/f/connector-odbc-%{version}/%{name}-%{version}-src.tar.gz
+License:        LGPL-2.1-or-later
+Source:         https://archive.mariadb.org/connector-odbc-%{version}/%{name}-%{version}-src.tar.gz
 Url:            https://mariadb.org/en/
 # Online documentation can be found at: https://mariadb.com/kb/en/library/mariadb-connector-odbc/
 
 BuildRequires:  cmake unixODBC-devel gcc-c++
-BuildRequires:  mariadb-connector-c-devel >= 3.0.6
+BuildRequires:  mariadb-connector-c-devel >= 3.3.19
 
 Patch1:         libraries_include_path.patch
 
@@ -38,7 +33,7 @@ and it supports both Unicode and ANSI modes.
 
 %build
 
-%cmake . \
+%cmake \
        -DCMAKE_BUILD_TYPE="%{?with_debug:Debug}%{!?with_debug:RelWithDebInfo}" \
        -DMARIADB_LINK_DYNAMIC="%{_libdir}/libmariadb.so" \
 \
@@ -74,22 +69,56 @@ FCFLAGS="$FCFLAGS   -O0 -g"; export FCFLAGS
 # This is unixODBC plugin. It resides directly in %%{_libdir} to be consistent with the rest of unixODBC plugins. Since it is plugin, it doesn´t need to be versioned.
 %{_libdir}/libmaodbc.so
 
+# Example configuration file for UnixODBC
+%{_pkgdocdir}/maodbc.ini
+
+# Pkgconfig
+%{_libdir}/pkgconfig/libmaodbc.pc
 
 
 %changelog
-* Mon Aug 09 2021 Mohan Boddu <mboddu@redhat.com> - 3.1.12-3
-- Rebuilt for IMA sigs, glibc 2.34, aarch64 flags
-  Related: rhbz#1991688
+* Thu Aug 20 2026 Luis Leal <luisl@scarab.co.za> - 3.1.23-1
+- Rebase to 3.1.23
 
-* Tue Jun 22 2021 Mohan Boddu <mboddu@redhat.com> - 3.1.12-2
-- Rebuilt for RHEL 9 BETA for openssl 3.0
-  Related: rhbz#1971065
+* Sun Jan 07 2024 Michal Schorm <mschorm@redhat.com> - 3.1.20-2
+- Fix minimal required version of mariadb-connector-c as per:
+  https://mariadb.com/kb/en/mariadb-connector-odbc-3-1-20-release-notes/
+
+* Sun Jan 07 2024 Michal Schorm <mschorm@redhat.com> - 3.1.20-1
+- Rebase to 3.1.20
+
+* Wed Jul 26 2023 Michal Schorm <mschorm@redhat.com> - 3.1.19-1
+- Rebase to 3.1.19
+
+* Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.18-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
+
+* Wed Apr 19 2023 Michal Schorm <mschorm@redhat.com> - 3.1.18-1
+- Rebase to 3.1.18
+
+* Thu Jan 19 2023 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.15-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_38_Mass_Rebuild
+
+* Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.15-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
+
+* Fri Feb 18 2022 Michal Schorm <mschorm@redhat.com> - 3.1.15-1
+- Rebase to 3.1.15
+
+* Fri Feb 18 2022 Michal Schorm <mschorm@redhat.com> - 3.1.14-1
+- Rebase to 3.1.14
+
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.13-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.13-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
+* Wed Jun 09 2021 Michal Schorm <mschorm@redhat.com> - 3.1.13-1
+- Rebase to 3.1.13
 
 * Thu Apr 22 2021 Michal Schorm <mschorm@redhat.com> - 3.1.12-1
 - Rebase to 3.1.12
-
-* Fri Apr 16 2021 Mohan Boddu <mboddu@redhat.com> - 3.1.11-3
-- Rebuilt for RHEL 9 BETA on Apr 15th 2021. Related: rhbz#1947937
 
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 3.1.11-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
